@@ -85,8 +85,8 @@ if __name__ == "__main__":
 	# Part 1 Solution
 	with open("day03_input","r") as infile:
 		nums = infile.read().strip().split('\n')
-	mask = int('1'*len(nums[0]),2)
 	size = len(nums[0])
+	mask = int('1'*size,2)
 	gamma = 0
 	for i in range(size):
 		count = 0
