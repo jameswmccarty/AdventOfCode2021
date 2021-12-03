@@ -74,6 +74,8 @@ Finally, to find the life support rating, multiply the oxygen generator rating (
 
 Use the binary numbers in your diagnostic report to calculate the oxygen generator rating and CO2 scrubber rating, then multiply them together. What is the life support rating of the submarine? (Be sure to represent your answer in decimal, not binary.)
 
+Your puzzle answer was 4481199.
+
 """
 
 
@@ -83,36 +85,31 @@ if __name__ == "__main__":
 	# Part 1 Solution
 	with open("day03_input","r") as infile:
 		nums = infile.read().strip().split('\n')
+	mask = int('1'*len(nums[0]),2)
+	size = len(nums[0])
 	gamma = 0
-	epislon = 0
-	for i in range(len(nums[0])):
-		ones  = 0
-		zeros = 0
+	for i in range(size):
+		count = 0
 		for num in nums:
 			if num[i] == '0':
-				zeros += 1
-			elif num[i] == '1':
-				ones += 1
-		if ones > zeros:
-			gamma |= 1 << (len(nums[0])-1-i)
-		else:
-			epislon |= 1 << (len(nums[0])-1-i)
-	print(gamma * epislon)
+				count -= 1
+			else:
+				count += 1
+		if count > 0:
+			gamma |= 1 << (size-1-i)
+	print(gamma * (~gamma & mask))
 
 	# Part 2 Solution
 	o2_rates = nums[:]
-	size = len(nums[0])
 	o2_rate = None
-	
 	for i in range(size):
-		ones  = 0
-		zeros = 0
+		count = 0
 		for num in o2_rates:
-			if num[i] == '0':
-				zeros += 1
-			elif num[i] == '1':
-				ones += 1
-		if ones >= zeros:
+			if num[i] == '1':
+				count += 1
+			else:
+				count -= 1
+		if count >= 0:
 			o2_rates = [ val for val in o2_rates if val[i] == '1' ]
 		else:
 			o2_rates = [ val for val in o2_rates if val[i] == '0' ]
@@ -123,14 +120,13 @@ if __name__ == "__main__":
 	co2_rates = nums[:]
 	co2_rate = None
 	for i in range(size):
-		ones  = 0
-		zeros = 0
+		count = 0
 		for num in co2_rates:
-			if num[i] == '0':
-				zeros += 1
-			elif num[i] == '1':
-				ones += 1
-		if ones >= zeros:
+			if num[i] == '1':
+				count += 1
+			else:
+				count -= 1
+		if count >= 0:
 			co2_rates = [ val for val in co2_rates if val[i] == '0' ]
 		else:
 			co2_rates = [ val for val in co2_rates if val[i] == '1' ]
