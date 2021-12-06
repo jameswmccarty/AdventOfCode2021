@@ -85,37 +85,19 @@ if __name__ == "__main__":
 		fish[i] = counters.count(i)
 	for _ in range(days):
 		new_fish = dict()
-		new_fish[0] = fish[1]
-		new_fish[1] = fish[2]
-		new_fish[2] = fish[3]
-		new_fish[3] = fish[4]
-		new_fish[4] = fish[5]
-		new_fish[5] = fish[6]
-		new_fish[6] = fish[7]+fish[0]
-		new_fish[7] = fish[8]
-		new_fish[8] = fish[0]
+		for i in range(9):
+			new_fish[i] = fish[(i+1)%9]
+		new_fish[6] += fish[0]
 		fish = new_fish
 	print(sum(fish.values()))
 
-
 	# Part 2 Solution
 
-	fish = dict()
-	days = 256
-	with open("day06_input","r") as infile:
-		counters = [ int(x) for x in infile.read().strip().split(',') ]
-	for i in range(9):
-		fish[i] = counters.count(i)
+	days = 256 - days
 	for _ in range(days):
 		new_fish = dict()
-		new_fish[0] = fish[1]
-		new_fish[1] = fish[2]
-		new_fish[2] = fish[3]
-		new_fish[3] = fish[4]
-		new_fish[4] = fish[5]
-		new_fish[5] = fish[6]
-		new_fish[6] = fish[7]+fish[0]
-		new_fish[7] = fish[8]
-		new_fish[8] = fish[0]
+		for i in range(9):
+			new_fish[i] = fish[(i+1)%9]
+		new_fish[6] += fish[0]
 		fish = new_fish
 	print(sum(fish.values()))
