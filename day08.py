@@ -151,7 +151,7 @@ if __name__ == "__main__":
 	for segset in digits:
 		unknown, known = segset.split(" | ")
 		for entry in known.split(" "):
-			if len(entry) in [2,3,4,7,8]:
+			if len(entry) in [2,3,4,7]:
 				count += 1
 	print(count)
 
