@@ -142,8 +142,6 @@ Both parts of this puzzle are complete! They provide two gold stars: **
 
 if __name__ == "__main__":
 
-	from itertools import permutations
-
 	# Part 1 Solution
 	with open("day08_input","r") as infile:
 		digits = [ x for x in infile.read().strip().split('\n') ]
@@ -156,6 +154,7 @@ if __name__ == "__main__":
 	# Part 2 Solution
 
 	digit_map = {'abcefg':'0','cf':'1','acdeg':'2','acdfg':'3','bcdf':'4','abdfg':'5','abdefg':'6','acf':'7','abcdefg':'8','abcdfg':'9'}
+	all_perms = ['BDEG','BDGE','BEDG','BEGD','BGDE','BGED','DBEG','DBGE','DEBG','DEGB','DGBE','DGEB','EBDG','EBGD','EDBG','EDGB','EGBD','EGDB','GBDE','GBED','GDBE','GDEB','GEBD','GEDB']
 	all_sums = 0
 	for segset in digits:
 		example, unknown = segset.split(" | ")
@@ -163,22 +162,38 @@ if __name__ == "__main__":
 		one   = [ x for x in example.split(" ") if len(x) == 2 ][0]
 		eight = [ x for x in example.split(" ") if len(x) == 7 ][0]
 		a_seg_char = seven.replace(one[0],'').replace(one[1],'')
-		alpha = eight.replace(a_seg_char,'')
-		for perm in permutations('BCDEFG'):
+		alpha = eight.replace(a_seg_char,'').replace(one[0],'').replace(one[1],'')
+		for perm in all_perms:
 			working_example = example[:]
 			for idx,val in enumerate(alpha):
 				working_example = working_example.replace(val,perm[idx])
 			working_example = working_example.replace(a_seg_char, 'A')
+			working_example = working_example.replace(one[0], 'C')
+			working_example = working_example.replace(one[1], 'F')
 			working_example = working_example.lower()
 			all_mapped = True
+			cf_map     = True
 			for entry in working_example.split(" "):
 				if ''.join(sorted([ x for x in entry ])) not in digit_map:
 					all_mapped = False
+					cf_map = False
+			if not all_mapped:
+				all_mapped = True
+				working_example = working_example.replace('c', 'T').replace('f', 'c').replace('T', 'f')
+				for entry in working_example.split(" "):
+					if ''.join(sorted([ x for x in entry ])) not in digit_map:
+						all_mapped = False
 			if all_mapped:
 				out = ''
 				for idx,val in enumerate(alpha):
 					unknown = unknown.replace(val,perm[idx])
 				unknown = unknown.replace(a_seg_char, 'A')
+				if cf_map:
+					unknown = unknown.replace(one[0], 'C')
+					unknown = unknown.replace(one[1], 'F')
+				else:
+					unknown = unknown.replace(one[1], 'C')
+					unknown = unknown.replace(one[0], 'F')
 				unknown = unknown.lower()
 				for entry in unknown.split(" "):
 					out += digit_map[''.join(sorted([ x for x in entry ]))]
