@@ -106,25 +106,22 @@ if __name__ == "__main__":
 
 	# Part 2 Solution
 	basins = []
-	visited = set()
 	for x,y in low_points:
-		if (x,y) not in visited:
-			basin = set()
-			basin.add((x,y))
-			q = [(x,y)]
-			while len(q) > 0:
-				x,y = q.pop(0)
-				visited.add((x,y))
-				for dx,dy in adj_points:
-					if (x+dx,y+dy) in visited:
-						for b in basins:
-							if (x+dx,y+dy) in b:
-								basin = basin + b
-								b = set()
-					elif (x+dx,y+dy) in map_points and map_points[(x+dx,y+dy)] != 9:
-						q.append((x+dx,y+dy))
-						basin.add((x+dx,y+dy))
-			basins.append(basin)
+		basin = set()
+		basin.add((x,y))
+		q = [(x,y)]
+		while len(q) > 0:
+			x,y = q.pop(0)
+			for dx,dy in adj_points:
+				if (x+dx,y+dy) not in basin and (x+dx,y+dy) in map_points and map_points[(x+dx,y+dy)] != 9:
+					q.append((x+dx,y+dy))
+					basin.add((x+dx,y+dy))
+		basins.append(basin)
+	for b1 in basins:
+		for b2 in basins:
+			if b1 != b2 and len(b1.intersection(b2)) > 0:
+				b1 += b2
+				b2 = set()
 	sizes = sorted([ len(x) for x in basins if len(x) > 0 ], reverse = True)
 	print(sizes[0]*sizes[1]*sizes[2])
 
