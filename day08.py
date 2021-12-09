@@ -157,10 +157,10 @@ if __name__ == "__main__":
 	all_sums = 0
 	for segset in digits:
 		example, unk = segset.split(" | ")
-		one   = [ x for x in example.split(" ") if len(x) == 2 ][0]
-		seven = [ x for x in example.split(" ") if len(x) == 3 ][0]
-		four  = [ x for x in example.split(" ") if len(x) == 4 ][0]
-		eight = [ x for x in example.split(" ") if len(x) == 7 ][0]
+		lens = sorted([x for x in example.split(" ")], key=lambda x:len(x))
+		# sorted by length, take sizes 2, 3, 4 and 7
+		# correlate to strings representing one, seven, four and eight
+		one, seven, four, eight = lens[0], lens[1], lens[2], lens[-1]
 		A = seven.replace(one[0],'').replace(one[1],'')
 		four = four.replace(one[0],'').replace(one[1],'')
 		bd_segs = ((four[0],four[1]),(four[1],four[0]))
