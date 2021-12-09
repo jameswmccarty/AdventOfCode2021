@@ -154,50 +154,34 @@ if __name__ == "__main__":
 	# Part 2 Solution
 
 	digit_map = {'abcefg':'0','cf':'1','acdeg':'2','acdfg':'3','bcdf':'4','abdfg':'5','abdefg':'6','acf':'7','abcdefg':'8','abcdfg':'9'}
-	all_perms = ['BDEG','BDGE','BEDG','BEGD','BGDE','BGED','DBEG','DBGE','DEBG','DEGB','DGBE','DGEB','EBDG','EBGD','EDBG','EDGB','EGBD','EGDB','GBDE','GBED','GDBE','GDEB','GEBD','GEDB']
 	all_sums = 0
 	for segset in digits:
-		example, unknown = segset.split(" | ")
-		seven = [ x for x in example.split(" ") if len(x) == 3 ][0]
+		example, unk = segset.split(" | ")
 		one   = [ x for x in example.split(" ") if len(x) == 2 ][0]
+		seven = [ x for x in example.split(" ") if len(x) == 3 ][0]
+		four  = [ x for x in example.split(" ") if len(x) == 4 ][0]
 		eight = [ x for x in example.split(" ") if len(x) == 7 ][0]
-		a_seg_char = seven.replace(one[0],'').replace(one[1],'')
-		alpha = eight.replace(a_seg_char,'').replace(one[0],'').replace(one[1],'')
-		for perm in all_perms:
-			working_example = example[:]
-			for idx,val in enumerate(alpha):
-				working_example = working_example.replace(val,perm[idx])
-			working_example = working_example.replace(a_seg_char, 'A')
-			working_example = working_example.replace(one[0], 'C')
-			working_example = working_example.replace(one[1], 'F')
-			working_example = working_example.lower()
-			all_mapped = True
-			cf_map     = True
-			for entry in working_example.split(" "):
-				if ''.join(sorted([ x for x in entry ])) not in digit_map:
-					all_mapped = False
-					cf_map = False
-			if not all_mapped:
-				all_mapped = True
-				working_example = working_example.replace('c', 'T').replace('f', 'c').replace('T', 'f')
-				for entry in working_example.split(" "):
-					if ''.join(sorted([ x for x in entry ])) not in digit_map:
-						all_mapped = False
-			if all_mapped:
-				out = ''
-				for idx,val in enumerate(alpha):
-					unknown = unknown.replace(val,perm[idx])
-				unknown = unknown.replace(a_seg_char, 'A')
-				if cf_map:
-					unknown = unknown.replace(one[0], 'C')
-					unknown = unknown.replace(one[1], 'F')
-				else:
-					unknown = unknown.replace(one[1], 'C')
-					unknown = unknown.replace(one[0], 'F')
-				unknown = unknown.lower()
-				for entry in unknown.split(" "):
-					out += digit_map[''.join(sorted([ x for x in entry ]))]
-				all_sums += int(out)
-				break
+		A = seven.replace(one[0],'').replace(one[1],'')
+		four = four.replace(one[0],'').replace(one[1],'')
+		bd_segs = ((four[0],four[1]),(four[1],four[0]))
+		cf_segs = ((one[0],one[1]),(one[1],one[0]))
+		eg_segs = eight.replace(A,'').replace(one[0],'').replace(one[1],'').replace(four[0],'').replace(four[1],'')
+		eg_segs = ((eg_segs[0],eg_segs[1]),(eg_segs[1],eg_segs[0]))
+		for C,F in cf_segs:
+			for B,D in bd_segs:
+				for E,G in eg_segs:
+					trial = example.replace(A,'A').replace(B,'B').replace(C,'C').replace(D,'D').replace(E,'E').replace(F,'F').replace(G,'G').lower()
+					all_mapped = True
+					for entry in trial.split(" "):
+						if ''.join(sorted([ x for x in entry ])) not in digit_map:
+							all_mapped = False
+							break
+					if all_mapped:
+						out = ''
+						unk = unk.replace(A,'A').replace(B,'B').replace(C,'C').replace(D,'D').replace(E,'E').replace(F,'F').replace(G,'G').lower()
+						for entry in unk.split(" "):
+							out += digit_map[''.join(sorted([ x for x in entry ]))]
+						all_sums += int(out)
+						break
 	print(all_sums)
 
