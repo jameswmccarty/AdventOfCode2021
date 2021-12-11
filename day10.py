@@ -114,27 +114,24 @@ Both parts of this puzzle are complete! They provide two gold stars: **
 
 if __name__ == "__main__":
 
-	def parse(line):
-		opens = ["(","{","<","["]
-		closes =[")","}",">","]"]
-		scores =[3,1197,25137,57]
+	opens = ["(","{","<","["]
+	closes =[")","}",">","]"]
+
+	def parse1(line):
+		scores = [3,1197,25137,57]
 		stack = []
 		for char in line:
 			if char in opens:
 				stack.append(char)
 			elif char in closes:
 				if stack[-1] != opens[closes.index(char)]:
-					return (False, scores[closes.index(char)])
+					return scores[closes.index(char)]
 				else:
 					stack.pop()
-		if len(stack) > 0:
-			return (False, 0)	
-		return (True, 0)
+		return 0
 
 	def parse2(line):
-		opens = ["(","{","<","["]
-		closes =[")","}",">","]"]
-		scores =[1,3,4,2]
+		scores = [1,3,4,2]
 		stack = []
 		for char in line:
 			if char in opens:
@@ -157,12 +154,11 @@ if __name__ == "__main__":
 
 	with open("day10_input","r") as infile:
 		lines = infile.read().strip().split('\n')
-	print(sum([ parse(line)[1] for line in lines ]))
+	print(sum([ parse1(line) for line in lines ]))
 
 
 	# Part 2 Solution
 	scores = [ parse2(line) for line in lines if parse2(line) > 0 ]
-	scores.sort()
-	print(scores[len(scores)//2])
+	print(sorted(scores)[len(scores)//2])
 
 	
