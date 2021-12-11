@@ -117,11 +117,11 @@ if __name__ == "__main__":
 					q.append((x+dx,y+dy))
 					basin.add((x+dx,y+dy))
 		basins.append(basin)
-	for b1 in basins:
-		for b2 in basins:
-			if b1 != b2 and len(b1.intersection(b2)) > 0:
-				b1 += b2
-				b2 = set()
+	for j,b1 in enumerate(basins):
+		for i in range(j+1,len(basins)):
+			if len(b1.intersection(basins[i])) > 0:
+				b1 += basins[i]
+				basin[i] = set()
 	sizes = sorted([ len(x) for x in basins if len(x) > 0 ], reverse = True)
 	print(sizes[0]*sizes[1]*sizes[2])
 
