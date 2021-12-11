@@ -106,6 +106,10 @@ Autocomplete tools are an odd bunch: the winner is found by sorting all of the s
 
 Find the completion string for each incomplete line, score the completion strings, and sort the scores. What is the middle score?
 
+Your puzzle answer was 2421222841.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
+
 """
 
 if __name__ == "__main__":
@@ -126,6 +130,27 @@ if __name__ == "__main__":
 		if len(stack) > 0:
 			return (False, 0)	
 		return (True, 0)
+
+	def parse2(line):
+		opens = ["(","{","<","["]
+		closes =[")","}",">","]"]
+		scores =[1,3,4,2]
+		stack = []
+		for char in line:
+			if char in opens:
+				stack.append(char)
+			elif char in closes:
+				if stack[-1] != opens[closes.index(char)]:
+					return 0
+				else:
+					stack.pop()
+		if len(stack) > 0:
+			stack = stack[::-1]
+			score = 0
+			for char in stack:
+				score *= 5
+				score += scores[opens.index(char)]	
+		return score
 				
 
 	# Part 1 Solution
@@ -136,6 +161,8 @@ if __name__ == "__main__":
 
 
 	# Part 2 Solution
-
+	scores = [ parse2(line) for line in lines if parse2(line) > 0 ]
+	scores.sort()
+	print(scores[len(scores)//2])
 
 	
