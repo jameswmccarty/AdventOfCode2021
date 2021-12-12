@@ -106,6 +106,7 @@ How many paths through this cave system are there that visit small caves at most
 Your puzzle answer was 4970.
 
 The first half of this puzzle is complete! It provides one gold star: *
+
 --- Part Two ---
 
 After reviewing the available paths, you realize you might have time to visit a single small cave twice. Specifically, big caves can be visited any number of times, a single small cave can be visited at most twice, and the remaining small caves can be visited at most once. However, the caves named start and end can only be visited exactly once each: once you leave the start cave, you may not return to it, and once you reach the end cave, the path must end immediately.
@@ -153,17 +154,22 @@ The slightly larger example above now has 103 paths through it, and the even lar
 
 Given these new rules, how many paths through this cave system are there?
 
+Your puzzle answer was 137948.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
+
 
 """
 
 if __name__ == "__main__":
 
 	cave_map = dict()
+	total_valids = set()
 	
 	def is_lower(word):
 		return True if word.lower() == word else False		
 	
-	def cave_bfs_path_count(start):
+	def cave_bfs_path_count1(start):
 		path_count = 0
 		q = []
 		q.append((start,[]))
@@ -176,7 +182,19 @@ if __name__ == "__main__":
 				elif (is_lower(entry) and entry not in path) or (not is_lower(entry)):
 					q.append((entry,path[:]))
 		return path_count		
-			
+
+	def cave_bfs_path_count2(start,allowed_double):
+		global total_valids
+		q = []
+		q.append((start,[]))
+		while len(q) > 0:
+			current,path = q.pop(0)
+			path += [current]
+			for entry in cave_map[current]:
+				if entry == "end":
+					total_valids.add('-'.join(path))
+				elif entry != "start" and (not is_lower(entry) or (entry not in path) or (entry == allowed_double and (path.count(entry) < 2))):
+					q.append((entry,path[:]))			
 				
 
 	# Part 1 Solution
@@ -190,7 +208,13 @@ if __name__ == "__main__":
 		if right not in cave_map:
 			cave_map[right] = set()
 		cave_map[right].add(left)
-	print(cave_bfs_path_count("start"))	
+	print(cave_bfs_path_count1("start"))	
 
 	# Part 2 Solution
-	
+	doubles = [ x for x in cave_map.keys() if is_lower(x) ]
+	doubles.remove("end")
+	doubles.remove("start")
+	for entry in doubles:
+		cave_bfs_path_count2("start",entry)
+	print(len(total_valids))	
+
