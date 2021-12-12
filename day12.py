@@ -213,10 +213,10 @@ if __name__ == "__main__":
 	print(cave_bfs_path_count1("start"))	
 
 	# Part 2 Solution
-	doubles = { x for x in cave_map.keys() if is_lower(x) }
-	doubles.remove("end")
-	doubles.remove("start")
+	doubles = { x for x in cave_map.keys() if is_lower(x) and len(cave_map[x]) > 3 }
+	doubles.discard("end")
+	doubles.discard("start")
 	for entry in doubles:
 		cave_bfs_path_count2("start",entry)
-	print(len(total_valids))	
+	print(len(total_valids))
 
