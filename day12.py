@@ -163,6 +163,8 @@ Both parts of this puzzle are complete! They provide two gold stars: **
 
 if __name__ == "__main__":
 
+	from collections import deque
+
 	cave_map = dict()
 	total_valids = set()
 	
@@ -171,30 +173,30 @@ if __name__ == "__main__":
 	
 	def cave_bfs_path_count1(start):
 		path_count = 0
-		q = []
-		q.append((start,[]))
+		q = deque()
+		q.append((start,set()))
 		while len(q) > 0:
-			current,path = q.pop(0)
-			path += [current]
+			current,path = q.popleft()
+			path.add(current)
 			for entry in cave_map[current]:
 				if entry == "end":
 					path_count += 1
 				elif (is_lower(entry) and entry not in path) or (not is_lower(entry)):
-					q.append((entry,path[:]))
+					q.append((entry,path.copy()))
 		return path_count		
 
 	def cave_bfs_path_count2(start,allowed_double):
 		global total_valids
-		q = []
-		q.append((start,[]))
+		q = deque()
+		q.append((start,''))
 		while len(q) > 0:
-			current,path = q.pop(0)
-			path += [current]
+			current,path = q.popleft()
+			path += '-'+current
 			for entry in cave_map[current]:
 				if entry == "end":
-					total_valids.add('-'.join(path))
+					total_valids.add(path)
 				elif entry != "start" and (not is_lower(entry) or (entry not in path) or (entry == allowed_double and (path.count(entry) < 2))):
-					q.append((entry,path[:]))			
+					q.append((entry,path[:]))
 				
 
 	# Part 1 Solution
@@ -211,7 +213,7 @@ if __name__ == "__main__":
 	print(cave_bfs_path_count1("start"))	
 
 	# Part 2 Solution
-	doubles = [ x for x in cave_map.keys() if is_lower(x) ]
+	doubles = { x for x in cave_map.keys() if is_lower(x) }
 	doubles.remove("end")
 	doubles.remove("start")
 	for entry in doubles:
