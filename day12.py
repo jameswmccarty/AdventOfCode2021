@@ -169,8 +169,8 @@ if __name__ == "__main__":
 	total_valids = set()
 	
 	def is_lower(word):
-		return True if word.lower() == word else False		
-	
+		return True if word.lower() == word else False
+
 	def cave_bfs_path_count1(start):
 		path_count = 0
 		q = deque()
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 					path_count += 1
 				elif (is_lower(entry) and entry not in path) or (not is_lower(entry)):
 					q.append((entry,path.copy()))
-		return path_count		
+		return path_count
 
 	def cave_bfs_path_count2(start,allowed_double):
 		global total_valids
@@ -197,7 +197,15 @@ if __name__ == "__main__":
 					total_valids.add(path)
 				elif entry != "start" and (not is_lower(entry) or (entry not in path) or (entry == allowed_double and (path.count(entry) < 2))):
 					q.append((entry,path[:]))
-				
+
+	def cave_dfs_path_count2(current,allowed_double,path):
+		global total_valids
+		if current == "end":
+			total_valids.add(path)
+			return
+		for entry in cave_map[current]:
+			if entry != "start" and (not is_lower(entry) or (entry not in path) or (entry == allowed_double and (path.count(entry) < 2))):
+				cave_dfs_path_count2(entry,allowed_double,path+"-"+current)
 
 	# Part 1 Solution
 	with open("day12_input","r") as infile:
@@ -210,13 +218,14 @@ if __name__ == "__main__":
 		if right not in cave_map:
 			cave_map[right] = set()
 		cave_map[right].add(left)
-	print(cave_bfs_path_count1("start"))	
+	print(cave_bfs_path_count1("start"))
 
 	# Part 2 Solution
 	doubles = { x for x in cave_map.keys() if is_lower(x) and len(cave_map[x]) > 3 }
 	doubles.discard("end")
 	doubles.discard("start")
 	for entry in doubles:
-		cave_bfs_path_count2("start",entry)
+		#cave_bfs_path_count2("start",entry)
+		cave_dfs_path_count2("start",entry,'')
 	print(len(total_valids))
 
