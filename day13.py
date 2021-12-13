@@ -122,34 +122,42 @@ Finish folding the transparent paper according to the instructions. The manual s
 
 What code do you use to activate the infrared thermal imaging camera system?
 
+ ##  #    ###  #### #  # #### #  # #  #
+#  # #    #  # #    # #  #    # #  #  #
+#  # #    #  # ###  ##   ###  ##   #  #
+#### #    ###  #    # #  #    # #  #  #
+#  # #    # #  #    # #  #    # #  #  #
+#  # #### #  # #### #  # #    #  #  ## 
+
+Your puzzle answer was ALREKFKU.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
+
 """
 
 if __name__ == "__main__":
 
 	# Part 1 Solution
 
-	dots = set()
 	instructions = []
+	dots = set()
 
-	def fold_up(axis):
-		global dots
-		new_set = set()
-		for dot in dots:
-			if dot[1] > axis:
-				new_set.add((dot[0],dot[1]-2*(dot[1]-axis)))
-			else:
-				new_set.add(dot)
-		dots = new_set
-
-	def fold_left(axis):
-		global dots
-		new_set = set()
-		for dot in dots:
-			if dot[0] > axis:
-				new_set.add((dot[0]-2*(dot[0]-axis),dot[1]))
-			else:
-				new_set.add(dot)
-		dots = new_set
+	def fold(dots,inst):
+		axis,units = inst
+		new_dots = set()
+		if axis == "y":
+			for dot in dots:
+				if dot[1] > units:
+					new_dots.add((dot[0],dot[1]-2*(dot[1]-units)))
+				else:
+					new_dots.add(dot)
+		elif axis == "x":
+			for dot in dots:
+				if dot[0] > units:
+					new_dots.add((dot[0]-2*(dot[0]-units),dot[1]))
+				else:
+					new_dots.add(dot)
+		return new_dots
 
 	with open("day13_input","r") as infile:
 		for line in infile.readlines():
@@ -162,33 +170,15 @@ if __name__ == "__main__":
 				instruction,value = line.strip().split("=")
 				instructions.append((instruction[-1],int(value)))
 
-	if instructions[0][0] == "y":
-		fold_up(instructions[0][1])
-	elif instructions[0][0] == "x":
-		fold_left(instructions[0][1])
+	dots = fold(dots,instructions[0])
 	print(len(dots))
 
 	# Part 2 Solution
 
-	dots = set()
-	instructions = []
-
-	with open("day13_input","r") as infile:
-		for line in infile.readlines():
-			if "," in line:
-				x,y = line.strip().split(",")
-				dots.add((int(x),int(y)))
-			elif line.strip() == '':
-				continue
-			elif "fold" in line:
-				instruction,value = line.strip().split("=")
-				instructions.append((instruction[-1],int(value)))
-
-	for instruction in instructions:
-		if instruction[0] == "y":
-			fold_up(instruction[1])
-		elif instruction[0] == "x":
-			fold_left(instruction[1])
+	instructions = instructions[1:]
+	while len(instructions) > 0:
+		dots = fold(dots,instructions[0])
+		instructions = instructions[1:]
 
 	for j in range(max([ x[1] for x in dots ])+1):
 		for i in range(max([ x[0] for x in dots ])+1):
