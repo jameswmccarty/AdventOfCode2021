@@ -67,6 +67,9 @@ In the above example, the most common element is B (occurring 2192039569602 time
 
 Apply 40 steps of pair insertion to the polymer template and find the most and least common elements in the result. What do you get if you take the quantity of the most common element and subtract the quantity of the least common element?
 
+Your puzzle answer was 3232426226464.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
 
 """
 
@@ -98,5 +101,41 @@ if __name__ == "__main__":
 	print(most-least)
 
 	# Part 2 Solution
+
+	change_list = dict()
+	pair_counts = dict()
+	histogram = dict()
+
+	with open("day14_input","r") as infile:
+		starting_chain = infile.readline().strip()
+		for line in infile.readlines():
+			if line.strip() == '':
+				continue
+			elif " -> " in line:
+				rule,insert = line.strip().split(" -> ")
+				pair_counts[rule] = 0
+				change_list[rule] = (rule[0]+insert,insert+rule[1],insert)
+				histogram[insert] = 0
+
+	for idx in range(len(starting_chain)-1):
+		pair_counts[starting_chain[idx:idx+2]] += 1
+	for idx in range(len(starting_chain)):
+		histogram[starting_chain[idx]] += 1
+
+	steps = 0
+	while steps < 40:
+		new_pair_counts = dict()
+		for entry in pair_counts:
+			new_pair_counts[entry] = 0
+		for entry in pair_counts:
+			d1,d2,h = change_list[entry]
+			new_pair_counts[d1] += pair_counts[entry]
+			new_pair_counts[d2] += pair_counts[entry]
+			histogram[h] += pair_counts[entry]
+		pair_counts = new_pair_counts
+		steps += 1
+	most = max([ x for x in histogram.values() ] )
+	least = min([ x for x in histogram.values() ] )
+	print(most-least)
 
 
