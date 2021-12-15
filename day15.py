@@ -172,6 +172,13 @@ if __name__ == "__main__":
 
 	cave_map = dict()
 	adj_steps = [(1,0),(-1,0),(0,1),(0,-1)]
+	cave_dim_x = None
+	cave_dim_y = None
+
+	def cost_at(pos):
+		x,y = pos
+		risk = cave_map[x%cave_dim_x,y%cave_dim_y] + x//cave_dim_x + y//cave_dim_y
+		return risk%10+1 if risk > 9 else risk
 
 	# Part 1 Solution
 	with open("day15_input","r") as infile:
@@ -180,7 +187,9 @@ if __name__ == "__main__":
 		for i,val in enumerate(line):
 			cave_map[(i,j)] = int(val)
 
-	goal = (len(cave[0])-1,len(cave)-1)
+	cave_dim_x = len(cave[0])
+	cave_dim_y = len(cave)
+	goal = (cave_dim_x-1,cave_dim_y-1)
 
 	q = []
 	heapq.heapify(q)
@@ -195,12 +204,26 @@ if __name__ == "__main__":
 			break
 		for dx,dy in adj_steps:
 			nx,ny = x+dx, y+dy
-			if nx >=0 and nx < len(cave[0]) and ny >= 0 and ny < len(cave) and (nx,ny) not in seen:
+			if nx >=0 and nx < cave_dim_x and ny >= 0 and ny < cave_dim_y and (nx,ny) not in seen:
 				heapq.heappush(q,(risk+cave_map[(nx,ny)],(nx,ny)))
 				seen.add((nx,ny))
 
 	# Part 2 Solution
 
-
-
-
+	goal = (cave_dim_x*5-1,cave_dim_y*5-1)
+	q = []
+	heapq.heapify(q)
+	seen = set()
+	heapq.heappush(q,(0,(0,0)))
+	while len(q) > 0:
+		risk,pos = heapq.heappop(q)
+		x,y = pos
+		seen.add(pos)
+		if pos == goal:
+			print(risk)
+			break
+		for dx,dy in adj_steps:
+			nx,ny = x+dx, y+dy
+			if nx >=0 and nx < cave_dim_x*5 and ny >= 0 and ny < cave_dim_y*5 and (nx,ny) not in seen:
+				heapq.heappush(q,(risk+cost_at((nx,ny)),(nx,ny)))
+				seen.add((nx,ny))
