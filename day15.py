@@ -164,6 +164,10 @@ The total risk of this path is 315 (the starting position is still never entered
 
 Using the full map, what is the lowest total risk of any path from the top left to the bottom right?
 
+Your puzzle answer was 2904.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
+
 """
 
 if __name__ == "__main__":
@@ -171,59 +175,55 @@ if __name__ == "__main__":
 	import heapq
 
 	cave_map = dict()
-	adj_steps = [(1,0),(-1,0),(0,1),(0,-1)]
-	cave_dim_x = None
-	cave_dim_y = None
+	cave_dim = None
 
 	def cost_at(pos):
 		x,y = pos
-		risk = cave_map[x%cave_dim_x,y%cave_dim_y] + x//cave_dim_x + y//cave_dim_y
+		risk = cave_map[x%cave_dim,y%cave_dim] + x//cave_dim + y//cave_dim
 		return risk%10+1 if risk > 9 else risk
 
 	# Part 1 Solution
+
 	with open("day15_input","r") as infile:
 		cave = infile.read().strip().split('\n')
 	for j,line in enumerate(cave):
 		for i,val in enumerate(line):
 			cave_map[(i,j)] = int(val)
 
-	cave_dim_x = len(cave[0])
-	cave_dim_y = len(cave)
-	goal = (cave_dim_x-1,cave_dim_y-1)
+	cave_dim = len(cave)
 
+	goal = (cave_dim-1,cave_dim-1)
 	q = []
 	heapq.heapify(q)
-	seen = set()
+	seen = set((0,0))
 	heapq.heappush(q,(0,(0,0)))
 	while len(q) > 0:
 		risk,pos = heapq.heappop(q)
 		x,y = pos
-		seen.add(pos)
 		if pos == goal:
 			print(risk)
 			break
-		for dx,dy in adj_steps:
+		for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:
 			nx,ny = x+dx, y+dy
-			if nx >=0 and nx < cave_dim_x and ny >= 0 and ny < cave_dim_y and (nx,ny) not in seen:
+			if (nx,ny) not in seen and nx >= 0 and nx < cave_dim and ny >= 0 and ny < cave_dim:
 				heapq.heappush(q,(risk+cave_map[(nx,ny)],(nx,ny)))
 				seen.add((nx,ny))
 
 	# Part 2 Solution
 
-	goal = (cave_dim_x*5-1,cave_dim_y*5-1)
+	goal = (cave_dim*5-1,cave_dim*5-1)
 	q = []
 	heapq.heapify(q)
-	seen = set()
+	seen = set((0,0))
 	heapq.heappush(q,(0,(0,0)))
 	while len(q) > 0:
 		risk,pos = heapq.heappop(q)
 		x,y = pos
-		seen.add(pos)
 		if pos == goal:
 			print(risk)
 			break
-		for dx,dy in adj_steps:
+		for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:
 			nx,ny = x+dx, y+dy
-			if nx >=0 and nx < cave_dim_x*5 and ny >= 0 and ny < cave_dim_y*5 and (nx,ny) not in seen:
+			if (nx,ny) not in seen and nx >= 0 and nx < cave_dim*5 and ny >= 0 and ny < cave_dim*5:
 				heapq.heappush(q,(risk+cost_at((nx,ny)),(nx,ny)))
 				seen.add((nx,ny))
