@@ -182,6 +182,23 @@ if __name__ == "__main__":
 		risk = cave_map[x%cave_dim,y%cave_dim] + x//cave_dim + y//cave_dim
 		return risk%10+1 if risk > 9 else risk
 
+	def search(goal,scale):
+		q = []
+		heapq.heapify(q)
+		seen = set((0,0))
+		heapq.heappush(q,(0,(0,0)))
+		while len(q) > 0:
+			risk,pos = heapq.heappop(q)
+			x,y = pos
+			if pos == goal:
+				return risk
+			for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:
+				nx,ny = x+dx, y+dy
+				if (nx,ny) not in seen and nx >= 0 and nx < cave_dim*scale and ny >= 0 and ny < cave_dim*scale:
+					heapq.heappush(q,(risk+cost_at((nx,ny)),(nx,ny)))
+					seen.add((nx,ny))
+		return float('inf')
+
 	# Part 1 Solution
 
 	with open("day15_input","r") as infile:
@@ -192,38 +209,9 @@ if __name__ == "__main__":
 
 	cave_dim = len(cave)
 
-	goal = (cave_dim-1,cave_dim-1)
-	q = []
-	heapq.heapify(q)
-	seen = set((0,0))
-	heapq.heappush(q,(0,(0,0)))
-	while len(q) > 0:
-		risk,pos = heapq.heappop(q)
-		x,y = pos
-		if pos == goal:
-			print(risk)
-			break
-		for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:
-			nx,ny = x+dx, y+dy
-			if (nx,ny) not in seen and nx >= 0 and nx < cave_dim and ny >= 0 and ny < cave_dim:
-				heapq.heappush(q,(risk+cave_map[(nx,ny)],(nx,ny)))
-				seen.add((nx,ny))
+	print(search((cave_dim-1,cave_dim-1),1))
 
 	# Part 2 Solution
 
-	goal = (cave_dim*5-1,cave_dim*5-1)
-	q = []
-	heapq.heapify(q)
-	seen = set((0,0))
-	heapq.heappush(q,(0,(0,0)))
-	while len(q) > 0:
-		risk,pos = heapq.heappop(q)
-		x,y = pos
-		if pos == goal:
-			print(risk)
-			break
-		for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:
-			nx,ny = x+dx, y+dy
-			if (nx,ny) not in seen and nx >= 0 and nx < cave_dim*5 and ny >= 0 and ny < cave_dim*5:
-				heapq.heappush(q,(risk+cost_at((nx,ny)),(nx,ny)))
-				seen.add((nx,ny))
+	print(search((cave_dim*5-1,cave_dim*5-1),5))
+
