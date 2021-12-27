@@ -355,6 +355,8 @@ if __name__ == "__main__":
 
 	no_stops = [(3,1),(5,1),(7,1),(9,1)]
 	
+	hall_spots = [(1,1),(2,1),(4,1),(6,1),(8,1),(10,1),(11,1)]
+	
 	goals = {'A' : ((3,2),(3,3)),
 		 'B' : ((5,2),(5,3)),
 		 'C' : ((7,2),(7,3)),
@@ -385,7 +387,24 @@ if __name__ == "__main__":
 		i = goals[char][0][0]
 		if (char,i,2) in occupied and (char,i,3) in occupied:
 			return True
-		return False		
+		return False
+	
+	def spot_reachable(char,current_pos,goal_pos,occupied):
+		if goal_pos in occupied:
+			return (False,float('inf'))
+		seen = set()
+		q = [(0,current_pos)]
+		while len(q) > 0:
+			steps,pos = q.pop(0)
+			if pos == goal_pos:
+				return (True,steps)
+			x,y = pos
+			for dx,dy in [(-1,0),(1,0),(0,-1),(0,1)]:
+				nx,ny = x+dx,y+dy
+				if (nx,ny) not in walls and (nx,ny) not in occupied and (nx,ny) not in seen:
+					q.append((steps+1,(nx,ny)))
+					seen.add((nx,ny))
+		return (False,float('inf'))
 	
 	def goal_reachable(char,current_pos,occupied):
 		# is hallway blocked by another type of char?
@@ -440,25 +459,24 @@ if __name__ == "__main__":
 				if not letter_sat(char,elements) and (x,y) != goals[char][1]:
 					rest_elements = [ x for x in elements if x != element ]
 					success,steps = goal_reachable(char,(x,y),rest_elements)
-					# can we move this lettter to a goal position?				
+					# can we move this lettter to a goal position?
 					if success and (x,y) not in goals[char]:
 						if lower_filled(char,rest_elements):
 							heapq.heappush(q,(cost+costs[char]*steps,rest_elements+[(char,goals[char][0][0],2)]))
 						else:
 							heapq.heappush(q,(cost+costs[char]*steps,rest_elements+[(char,goals[char][0][0],3)]))
 					# move the letter to another legal spot and continue search
-					else:
+					elif y != 1: # already in hallway
 						blocked_set = { (x,y) for i,x,y in elements }
-						for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)):
-							nx,ny = x+dx,y+dy
-							config = { p for p in rest_elements }
-							config.add((char,nx,ny))
-							if hash(frozenset(config)) not in seen_configs:
-								# take legal move, and record this state
-								if (nx,ny) not in walls and (nx,ny) not in blocked_set and (nx,ny) not in anti_goals[char]:
-									if not (ny > y and nx != goals[char][0][0]):
-										heapq.heappush(q,(cost+costs[char],rest_elements+[(char,nx,ny)]))
-										seen_configs.add(hash(frozenset(config)))
+						for spot in hall_spots:
+							reachable,steps = spot_reachable(char,(x,y),spot,blocked_set)
+							if reachable:
+								config = { p for p in rest_elements }
+								nx,ny = spot
+								config.add((char,nx,ny))
+								if hash(frozenset(config)) not in seen_configs:
+									heapq.heappush(q,(cost+costs[char]*steps,rest_elements+[(char,nx,ny)]))
+									seen_configs.add(hash(frozenset(config)))
 		return float('inf')
 
 	# Part 1 Solution
