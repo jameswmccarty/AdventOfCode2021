@@ -359,7 +359,7 @@ if __name__ == "__main__":
 
 	hall_spots = [(1,1),(2,1),(4,1),(6,1),(8,1),(10,1),(11,1)]
 
-	stack_depth = 4
+	stack_depth = 2
 
 	goals_idx = {'A' : 3,
 		 'B' : 5,
@@ -374,16 +374,13 @@ if __name__ == "__main__":
 		 'D' : 1000}
 
 	def set_goals(posits):
-		goals = dict()
+		goals = [2,2,2,2]
 		for letter in ['A','B','C','D']:
 			for j in range(1+stack_depth,1,-1):
 				if (letter,goals_idx[letter],j) not in posits:
-					goals[letter] = j
+					goals[goals_y_idx[letter]] = j
 					break
-		for letter in ['A','B','C','D']:
-			if letter not in goals:
-				goals[letter] = 2
-		return [goals['A'],goals['B'],goals['C'],goals['D']]
+		return goals
 
 	def letter_sat(char,occupied):
 		fills = 0
@@ -491,9 +488,9 @@ if __name__ == "__main__":
 		return float('inf')
 
 	# Part 1 Solution
-	
+
 	posits = []
-	
+
 	with open("day23_input","r") as infile:
 		y = 0
 		for line in infile.readlines():
@@ -504,10 +501,29 @@ if __name__ == "__main__":
 					posits.append((char,idx,y))
 			y += 1
 	goals = set_goals(posits)
-	#print(goals)
 	print(heap_search(posits,goals))
-	
-	
+
 	# Part 2 Solution
 
+	posits = []
+	walls = set()
+	add1='  #D#C#B#A#'
+	add2='  #D#B#A#C#'
+	lines = []
+	with open("day23_input","r") as infile:
+		for line in infile.readlines():
+			lines.append(line.rstrip())
+	lines.insert(3,add1)
+	lines.insert(4,add2)
+	stack_depth = 4
+	y = 0
+	for line in lines:
+		for idx,char in enumerate(line.rstrip()):
+			if char == '#':
+				walls.add((idx,y))
+			elif char in ['A','B','C','D']:
+				posits.append((char,idx,y))
+		y += 1
+	goals = set_goals(posits)
+	print(heap_search(posits,goals))
 
