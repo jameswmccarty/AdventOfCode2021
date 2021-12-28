@@ -333,6 +333,10 @@ In this updated example, the least energy required to organize these amphipods i
 
 Using the initial configuration from the full diagram, what is the least energy required to organize the amphipods?
 
+Your puzzle answer was 49742.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
+
 """
 
 if __name__ == "__main__":
@@ -348,51 +352,61 @@ if __name__ == "__main__":
 	1 #...........#
 	2 ###A#B#C#D###
 	3   #A#B#C#D#
-	4   #########	
+	4   #########
 	"""
 
 	walls = set()
 
-	no_stops = [(3,1),(5,1),(7,1),(9,1)]
-	
 	hall_spots = [(1,1),(2,1),(4,1),(6,1),(8,1),(10,1),(11,1)]
-	
-	goals = {'A' : ((3,2),(3,3)),
-		 'B' : ((5,2),(5,3)),
-		 'C' : ((7,2),(7,3)),
-		 'D' : ((9,2),(9,3))}
-	
-	anti_goals = {'A' : set(),
-		      'B' : set(),
-		      'C' : set(),
-		      'D' : set()}
 
-	for char in ['A','B','C','D']:
-		indexes = [3,5,7,9]
-		indexes.remove(goals[char][0][0])
-		for i in indexes:
-			anti_goals[char].add((i,3))
-	
+	stack_depth = 4
+
+	goals_idx = {'A' : 3,
+		 'B' : 5,
+		 'C' : 7,
+		 'D' : 9}
+
+	goals_y_idx = {'A':0,'B':1,'C':2,'D':3}
+
 	costs = {'A' : 1,
 		 'B' : 10,
 		 'C' : 100,
 		 'D' : 1000}
-	
-	def lower_filled(char,occupied):
-		if (char,goals[char][0][0],3) in occupied:
-			return True
-		return False
-	
+
+	def set_goals(posits):
+		goals = dict()
+		for letter in ['A','B','C','D']:
+			for j in range(1+stack_depth,1,-1):
+				if (letter,goals_idx[letter],j) not in posits:
+					goals[letter] = j
+					break
+		for letter in ['A','B','C','D']:
+			if letter not in goals:
+				goals[letter] = 2
+		return [goals['A'],goals['B'],goals['C'],goals['D']]
+
 	def letter_sat(char,occupied):
-		i = goals[char][0][0]
-		if (char,i,2) in occupied and (char,i,3) in occupied:
+		fills = 0
+		for y in range(2,2+stack_depth):
+			if (char,goals_idx[char],y) in occupied:
+				fills += 1
+		if fills == stack_depth:
 			return True
 		return False
-	
+
+	def hall_blocked(char,occupied):
+		for i,x,y in occupied:
+			if i != char and x == goals_idx[char]:
+				return True
+		return False
+
 	def spot_reachable(char,current_pos,goal_pos,occupied):
-		if goal_pos in occupied:
+		if goal_pos in occupied and current_pos != goal_pos:
 			return (False,float('inf'))
+		if goal_pos == current_pos:
+			return (True,0)
 		seen = set()
+		seen.add(current_pos)
 		q = [(0,current_pos)]
 		while len(q) > 0:
 			steps,pos = q.pop(0)
@@ -406,46 +420,41 @@ if __name__ == "__main__":
 					seen.add((nx,ny))
 		return (False,float('inf'))
 	
-	def goal_reachable(char,current_pos,occupied):
+	def goal_reachable(char,current_pos,occupied,goals):
 		# is hallway blocked by another type of char?
-		for i,x,y in occupied:
-			if (x,y) in goals[char] and i != char:
-				return (False,float('inf'))
-		letters = ['A','B','C','D']
-		letters.remove(char)
-		# char parked in no-stop area
-		for x in letters:
-			if (x,goals[char][0][0],1) in occupied:
-				return (False,float('inf'))
+		if hall_blocked(char,occupied):
+			return (False,float('inf'))
+		x,y = current_pos
+		if x == goals_idx[char] and y >= goals[goals_y_idx[char]]:
+			return (False,float('inf'))
 		blocked_set = { (x,y) for i,x,y in occupied }
-		low_fill = lower_filled(char,occupied)
-		q = deque()
-		q.append((current_pos,0))
 		seen = set()
 		seen.add(current_pos)
+		q = deque()
+		q.append((current_pos,0))
 		while len(q) > 0:
 			pos,steps = q.popleft()
+			x,y = pos
 			# reached a goal, already verified hall not blocked
-			if pos in goals[char]:
-				if low_fill:
-					return (True,steps)
-				return (True,steps+1) # move into lowest spot
+			if x == goals_idx[char] and y == goals[goals_y_idx[char]]:
+				return(True,steps)
 			else:
-				x,y = pos
 				for dx,dy in [(-1,0),(1,0),(0,-1),(0,1)]:
 					nx,ny = x+dx,y+dy
-					if (nx,ny) not in walls and (nx,ny) not in blocked_set and (nx,ny) not in seen and (nx,ny) not in anti_goals[char]:
+					if (nx,ny) not in walls and (nx,ny) not in blocked_set and (nx,ny) not in seen:
 						q.append(((nx,ny),steps+1))
 						seen.add((nx,ny))
 		return (False,float('inf'))
 	
-	def heap_search(posits):
+	def heap_search(posits,goals):
+
 		seen_configs = { hash(frozenset(posits)) }
 		q = []
 		heapq.heapify(q)
-		heapq.heappush(q,(0,posits[:]))
+		heapq.heappush(q,(0,goals[:],posits[:]))
 		while len(q) > 0:
-			cost, elements = heapq.heappop(q)
+			cost, goals, elements = heapq.heappop(q)
+			#print(cost,elements)
 			all_sat = True
 			for letter in ['A','B','C','D']:
 				if not letter_sat(letter,elements):
@@ -456,18 +465,20 @@ if __name__ == "__main__":
 				char,x,y = element
 				# don't continue if this letter is solved or if this
 				# current letter is in the goal position
-				if not letter_sat(char,elements) and (x,y) != goals[char][1]:
-					rest_elements = [ x for x in elements if x != element ]
-					success,steps = goal_reachable(char,(x,y),rest_elements)
-					# can we move this lettter to a goal position?
-					if success and (x,y) not in goals[char]:
-						if lower_filled(char,rest_elements):
-							heapq.heappush(q,(cost+costs[char]*steps,rest_elements+[(char,goals[char][0][0],2)]))
-						else:
-							heapq.heappush(q,(cost+costs[char]*steps,rest_elements+[(char,goals[char][0][0],3)]))
-					# move the letter to another legal spot and continue search
-					elif y != 1: # already in hallway
-						blocked_set = { (x,y) for i,x,y in elements }
+				if not letter_sat(char,elements):
+					rest_elements = [ j for j in elements if j != element ]
+					success,steps = goal_reachable(char,(x,y),rest_elements,goals)
+					# can we move this letter to a goal position?
+					if success:
+						gy = goals[goals_y_idx[char]]
+						new_goals = goals[:]
+						new_goals[goals_y_idx[char]] = max(2,goals[goals_y_idx[char]]-1)
+						config = { p for p in rest_elements }
+						config.add((char,goals_idx[char],gy))
+						heapq.heappush(q,(cost+costs[char]*steps,new_goals,rest_elements+[(char,goals_idx[char],gy)]))
+						seen_configs.add(hash(frozenset(config)))
+					elif y != 1:
+						blocked_set = { (p,q) for i,p,q in elements }
 						for spot in hall_spots:
 							reachable,steps = spot_reachable(char,(x,y),spot,blocked_set)
 							if reachable:
@@ -475,7 +486,7 @@ if __name__ == "__main__":
 								nx,ny = spot
 								config.add((char,nx,ny))
 								if hash(frozenset(config)) not in seen_configs:
-									heapq.heappush(q,(cost+costs[char]*steps,rest_elements+[(char,nx,ny)]))
+									heapq.heappush(q,(cost+costs[char]*steps,goals,rest_elements+[(char,nx,ny)]))
 									seen_configs.add(hash(frozenset(config)))
 		return float('inf')
 
@@ -492,8 +503,10 @@ if __name__ == "__main__":
 				elif char in ['A','B','C','D']:
 					posits.append((char,idx,y))
 			y += 1
-	print(heap_search(posits))
-			
+	goals = set_goals(posits)
+	#print(goals)
+	print(heap_search(posits,goals))
+	
 	
 	# Part 2 Solution
 
