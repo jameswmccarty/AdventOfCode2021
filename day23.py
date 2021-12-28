@@ -383,13 +383,7 @@ if __name__ == "__main__":
 		return goals
 
 	def letter_sat(char,occupied):
-		fills = 0
-		for y in range(2,2+stack_depth):
-			if (char,goals_idx[char],y) in occupied:
-				fills += 1
-		if fills == stack_depth:
-			return True
-		return False
+		return True if sum([ (char,goals_idx[char],y) in occupied for y in range(2,2+stack_depth) ]) == stack_depth else False
 
 	def hall_blocked(char,occupied):
 		for i,x,y in occupied:
@@ -404,9 +398,10 @@ if __name__ == "__main__":
 			return (True,0)
 		seen = set()
 		seen.add(current_pos)
-		q = [(0,current_pos)]
+		q = deque()
+		q.append((0,current_pos))
 		while len(q) > 0:
-			steps,pos = q.pop(0)
+			steps,pos = q.popleft()
 			if pos == goal_pos:
 				return (True,steps)
 			x,y = pos
