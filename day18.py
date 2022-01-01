@@ -289,5 +289,20 @@ if __name__ == "__main__":
 	print(find_magnitude(working_statement))
 
 	# Part 2 Solution
+	hw_max = 0
+	lines = []
+	with open("day18_input","r") as infile:
+		for line in infile.readlines():
+			lines.append(build_statement(line.strip()))
+	for line1 in lines:
+		for line2 in lines:
+			if line1 != line2:
+				working_statement = concat_statements(line1,line2)
+				working_statement = solve_statement(working_statement)
+				hw_max = max(find_magnitude(working_statement),hw_max)
+				working_statement = concat_statements(line2,line1)
+				working_statement = solve_statement(working_statement)
+				hw_max = max(find_magnitude(working_statement),hw_max)
+	print(hw_max)
 
 
