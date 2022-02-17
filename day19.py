@@ -388,6 +388,9 @@ if __name__ == "__main__":
 	beacons_sets_rotated = []
 	scanner_posits = dict()
 
+	conv_beacons_to_scanner_idx_map = dict()
+	idx_to_scanner_loc_map = dict()
+
 	def rotation_poss_set(x,y,z):
 		orientations = list()
 		perms = [(x, y, z),(x, z, y),(y, x, z),(y, z, x),(z, x, y),(z, y, x)]
@@ -437,6 +440,7 @@ if __name__ == "__main__":
 	base_set = beacons_sets[0]
 	all_beacons_converted = { _ for _ in base_set }
 	unmatched_idxs = [ x for x in range(1,len(beacons_sets)) ]
+	idx_to_scanner_loc_map[0] = (0,0,0)
 
 	while len(unmatched_idxs) > 0:
 		for entry in unmatched_idxs:
@@ -445,16 +449,25 @@ if __name__ == "__main__":
 				trial_list = []
 				for point in beacons_sets_rotated[entry]:
 					trial_list.append(point[idx])
-				match = apply_against(base_set,trial_list)
-				if match != None:
+				match_offset = apply_against(base_set,trial_list)
+				if match_offset != None:
 					unmatched_idxs.remove(entry)
+					idx_to_scanner_loc_map[entry] = match_offset
 					for old_point in trial_list:
 						ox,oy,oz = old_point
-						dx,dy,dz = match
+						dx,dy,dz = match_offset
 						nx,ny,nz = ox-dx,oy-dy,oz-dz
-						all_beacons_converted.add((nx,ny,nz))
+						if (nx,ny,nz) not in all_beacons_converted:
+							all_beacons_converted.add((nx,ny,nz))
 					break
 	print(len(all_beacons_converted))
 
 	# Part 2 Solution
+
+	max_dist = 0
+	all_scanner_locs = [ v for k,v in idx_to_scanner_loc_map.items() ]
+	for i in range(len(all_scanner_locs)):
+		for j in range(i,len(all_scanner_locs)):
+			max_dist = max(max_dist,mh_dist(all_scanner_locs[i],all_scanner_locs[j]))
+	print(max_dist)
 
